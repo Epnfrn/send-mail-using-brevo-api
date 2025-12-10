@@ -1,7 +1,8 @@
 
 // Librerías
-require("dotenv").config();
 const { Command } = require("commander");               // funcionalidad de args de CLI
+const path = require("path"); 
+require("dotenv").config({ path: path.join(__dirname, ".env") });
 
 
 // Constantes globables
