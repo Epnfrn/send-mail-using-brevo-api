@@ -94,16 +94,16 @@ async function main() {
 
     // Petición POST a la API de Brevo
     const response = await fetch(API_URL, brevoAPIPostData);
+    const responseBody = await response.text();
 
     // Mostrar información sobre la respuesta HTTP de la API Brevo
     console.log("Response Status:", response.status);
-    console.log("Response Body:", await response.text());
+    console.log("Response Body:", responseBody);
 
     // Chequeo error en la petición POST
     if (!response.ok) {
-        const error = await response.text();
-
-        console.error(`Error al hacer petición POST a la API Brevo: ${error}`, { status: 500 });
+        console.error(`Error al hacer petición POST a la API Brevo: ${responseBody}`, { status: 500 });
+        process.exit(1);
     }
 
     // Responder si todo salió ok
