@@ -1,6 +1,7 @@
 
 // Librerías
 const { Command } = require("commander");               // funcionalidad de args de CLI
+const fs = require("fs");                               // interacción sincrónica con sistema de archivos
 const path = require("path"); 
 require("dotenv").config({ path: path.join(__dirname, ".env") });
 
@@ -8,7 +9,6 @@ require("dotenv").config({ path: path.join(__dirname, ".env") });
 // Constantes globables
 const BREVO_API_KEY = process.env.BREVO_API_KEY;               
 const BREVO_MAIL = process.env.BREVO_MAIL;
-
 const API_URL = 'https://api.brevo.com/v3/smtp/email';
 
 
@@ -19,30 +19,59 @@ const program = new Command();
 program
     .option("--to <destinatarios...>", "Array de destinatarios con formato 'Nombre <correo>'")
     .option("--subject <string>", "Asunto del correo electrónico")
-    .option("--content <string>", "Contenido del correo electrónico");
+    .option("--content <string>", "Contenido del correo electrónico")
+    .option("--content-file <string>", "Ubicación de archivo HTML con contenido del correo electrónico");
 
 program.parse();
 const options = program.opts();
 
 
-// Contenido del correo con formato
-const HTMLString = `
+// Información del correo
+const to = formatRecipientsList(options.to); 
+const subject = options.subject;
+
+let content = "";
+
+// Determinar contenido del correo 
+// - Evaluar si se utilizó opción --content o --content-file
+if (typeof options.content !== "undefined") {
+    
+    // Contenido del correo con formato simple
+    content = `
     <html>
         <head></head>
         <body>
             <p>${options.content}</p>
         </body>
     </html>
-`
+    `
+}
+else if (typeof options.contentFile !== "undefined") {
+    
+    // Evaluar error en donde NO sea archivo HTML
+    const fileType = path.extname(options.contentFile);     // Ej. ".html"
+
+    if (fileType !== ".html") {        
+        console.error("Error: Archivo de formato diferente a HTML");
+
+        console.log("Terminando ejecución de programa")
+        process.exit(1);
+    }
+    
+    // Acceder a archivo HTML
+    content = fs.readFileSync(options.contentFile, "utf-8");
+}
+
+
 // Estructura de datos que representa el correo
 const mail = {
     sender: {
         name: "[TEST] Correo electrónico programático",
         email: BREVO_MAIL
     },
-    to: formatRecipientsList(options.to),
-    subject: options.subject,
-    htmlContent: HTMLString
+    to: to,
+    subject: subject,
+    htmlContent: content
 };
 
 // Estructura de datos que representa la información que se enviará a la API de Brevo como petición POST
@@ -90,6 +119,7 @@ function formatRecipientsList(rL) {                                             
     return recipientsList;
 }
 
+
 // Función main() (asincrónica para poder usar await)
 async function main() {
 
@@ -110,7 +140,6 @@ async function main() {
     // Responder si todo salió ok
     console.log("Correo electrónico enviado exitosamente a través de API Brevo")
 }
-
 
 
 main();
