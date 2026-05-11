@@ -7,8 +7,9 @@ require("dotenv").config({ path: path.join(__dirname, ".env") });
 
 
 // Constantes globables
-const BREVO_API_KEY = process.env.BREVO_API_KEY;               
-const BREVO_MAIL = process.env.BREVO_MAIL;
+const BREVO_API_KEY = process.env.BREVO_API_KEY;
+const BREVO_SENDER_NAME = process.env.BREVO_SENDER_NAME;
+const BREVO_SENDER_MAIL = process.env.BREVO_SENDER_MAIL;
 const API_URL = 'https://api.brevo.com/v3/smtp/email';
 
 
@@ -66,8 +67,8 @@ else if (typeof options.contentFile !== "undefined") {
 // Estructura de datos que representa el correo
 const mail = {
     sender: {
-        name: "[TEST] Correo electrónico programático",
-        email: BREVO_MAIL
+        name: BREVO_SENDER_NAME,
+        email: BREVO_SENDER_MAIL
     },
     to: to,
     subject: subject,
